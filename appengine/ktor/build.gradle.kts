@@ -23,7 +23,9 @@ dependencies {
     implementation(platform("io.ktor:ktor-bom:1.6.4"))
     implementation("io.ktor:ktor-server-servlet")
     implementation("io.ktor:ktor-html-builder")
-    implementation("com.google.cloud:google-cloud-logging-logback:0.117.0-alpha")
+    implementation("io.ktor:ktor-websockets")
+//    implementation("com.google.cloud:google-cloud-logging-logback:0.117.0-alpha")
+    implementation("ch.qos.logback:logback-classic:1.2.3")
 
     runtimeOnly("com.google.appengine:appengine:1.9.92")
 }

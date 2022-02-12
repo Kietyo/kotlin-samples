@@ -1,35 +1,24 @@
-/*
- * Copyright 2018 Google LLC.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- * http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 package com.example.demo
 
 /* ktlint-disable no-wildcard-imports */
 import io.ktor.application.*
 import io.ktor.features.*
 import io.ktor.html.*
+import io.ktor.http.cio.websocket.*
 import io.ktor.routing.*
+import io.ktor.websocket.*
 import kotlinx.html.*
+import java.util.*
+import kotlin.collections.LinkedHashSet
 
 // Entry Point of the application as defined in resources/application.conf.
 // @see https://ktor.io/servers/configuration.html#hocon-file
 fun Application.main() {
     // This adds Date and Server headers to each response, and allows custom additional headers
-    install(DefaultHeaders)
+//    install(DefaultHeaders)
     // This uses use the logger to log every call (request/response)
-    install(CallLogging)
+//    install(CallLogging)
+    install(WebSockets)
 
     routing {
         // Here we use a DSL for building HTML on the route "/"
@@ -57,6 +46,32 @@ fun Application.main() {
                     }
                 }
             }
+        }
+
+        val connections = Collections.synchronizedSet<Connection?>(LinkedHashSet())
+        webSocket("/chat") {
+            val thisConnection = Connection(this)
+            connections += thisConnection
+            try {
+                send("You are connected! There are ${connections.size} users here.")
+                for(frame in incoming) {
+                    frame as? Frame.Text ?: continue
+                    val receivedText = frame.readText()
+                    val textWithUsername = "[${thisConnection.name}]: $receivedText"
+                    connections.forEach {
+                        it.session.send(textWithUsername)
+                    }
+                }
+            } catch (e: Exception) {
+//                println(e.localizedMessage)
+            } finally {
+                connections -= thisConnection
+//                println("Removing $thisConnection")
+                connections.forEach {
+                    it.session.send("${thisConnection.name} has left the room")
+                }
+            }
+
         }
     }
 }
