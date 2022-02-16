@@ -11,6 +11,8 @@ import kotlinx.html.*
 import java.util.*
 import kotlin.collections.LinkedHashSet
 
+fun main(args: Array<String>): Unit = io.ktor.server.netty.EngineMain.main(args)
+
 // Entry Point of the application as defined in resources/application.conf.
 // @see https://ktor.io/servers/configuration.html#hocon-file
 fun Application.main() {
@@ -18,7 +20,7 @@ fun Application.main() {
 //    install(DefaultHeaders)
     // This uses use the logger to log every call (request/response)
 //    install(CallLogging)
-    install(WebSockets)
+//    install(WebSockets)
 
     routing {
         // Here we use a DSL for building HTML on the route "/"
